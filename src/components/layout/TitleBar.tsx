@@ -446,7 +446,6 @@ export const TitleBar: React.FC<TitleBarProps> = React.memo(({
                                             fontWeight: 500,
                                             background: useActiveColor ? 'var(--accent)' : (isActive || alwaysHover ? 'var(--hover-surface)' : 'transparent'),
                                             color: useActiveColor ? 'white' : (isActive ? 'var(--text-primary)' : 'var(--text-secondary)'),
-                                            border: isActive ? '1px solid var(--border)' : '1px solid transparent',
                                             transition: 'background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s',
                                             whiteSpace: 'nowrap',
                                             minWidth: '48px',
