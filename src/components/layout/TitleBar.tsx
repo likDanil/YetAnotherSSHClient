@@ -248,7 +248,7 @@ export const TitleBar: React.FC<TitleBarProps> = React.memo(({
     const platform = ipcRenderer?.platform;
     const isMac = platform === 'darwin';
     const isWin = platform === 'win32';
-    const showCustomControls = !isMac && !isWin;
+    const showCustomControls = false;
 
     const [isMaximized, setIsMaximized] = React.useState(false);
 
