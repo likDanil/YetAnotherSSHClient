@@ -106,7 +106,6 @@ const McpTabHeader: React.FC<McpTabHeaderProps> = ({
                             fontSize: 'var(--ui-font-size)',
                             borderRadius: '6px',
                             cursor: 'pointer',
-                            boxSizing: 'border-box',
                             background: '#2ea44f',
                             borderColor: '#2ea44f'
                         }}

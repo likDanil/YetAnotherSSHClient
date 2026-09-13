@@ -362,18 +362,9 @@ export const TitleBar: React.FC<TitleBarProps> = React.memo(({
                                     width: '10px',
                                     height: '10px',
                                     borderRadius: '50%',
-                                    backgroundColor: '#ef4444',
-                                    color: '#ffffff',
-                                    fontSize: '8px',
-                                    fontWeight: 700,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    lineHeight: 1,
+                                    backgroundColor: '#EFC55A',
                                     pointerEvents: 'none'
-                                }}>
-                                    1
-                                </span>
+                                }} />
                             )}
                         </button>
 

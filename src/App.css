@@ -499,18 +499,11 @@ input:checked + .ui-slider:before {
 }
 
 .mcp-tab-glow {
-  position: relative;
+
 }
 
-.mcp-tab-glow::after {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  border-radius: 6px;
-  border: 1px solid transparent;
-  pointer-events: none;
-  animation: mcp-tab-glow-animation 3s infinite ease-in-out;
-  z-index: 1;
+.mcp-tab-glow:hover {
+
 }
 
 .refresh-icon-spin {

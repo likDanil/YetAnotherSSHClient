@@ -166,7 +166,6 @@ export const McpSection: React.FC<McpSectionProps> = ({ config, setConfig, showN
                                 height: '8px',
                                 borderRadius: '50%',
                                 backgroundColor: '#2ea44f',
-                                boxShadow: '0 0 8px #2ea44f',
                                 display: 'inline-block'
                             }} />
                         )}

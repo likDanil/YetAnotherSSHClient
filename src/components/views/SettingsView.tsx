@@ -306,28 +306,18 @@ export const SettingsView: React.FC<SettingsViewProps> = React.memo(({ config, s
                                     height: '8px',
                                     borderRadius: '50%',
                                     backgroundColor: '#2ea44f',
-                                    boxShadow: '0 0 8px #2ea44f',
                                     flexShrink: 0
                                 }} />
                             )}
                             {item.id === 'about' && isUpdateAvailable && (
                                 <span style={{
                                     marginLeft: 'auto',
-                                    width: '18px',
-                                    height: '18px',
+                                    width: '8px',
+                                    height: '8px',
                                     borderRadius: '50%',
-                                    backgroundColor: '#ef4444',
-                                    color: '#ffffff',
-                                    fontSize: '10px',
-                                    fontWeight: 700,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    lineHeight: 1,
+                                    backgroundColor: '#EFC55A',
                                     flexShrink: 0
-                                }}>
-                                    1
-                                </span>
+                                }} />
                             )}
                         </button>
                     ))}
