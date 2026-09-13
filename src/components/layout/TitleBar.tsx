@@ -113,7 +113,7 @@ export const TitleBar: React.FC<TitleBarProps> = React.memo(({
                     const maxLeft = containerRect.width - draggedWidth;
                     draggedLeft = Math.max(minLeft, Math.min(maxLeft, draggedLeft));
 
-                    // Style the dragged element instantly with hardware-accelerated translate3d
+                    // Style the dragged element instantly with hardware-accelerated translate 3d
                     draggedElement.style.transform = `translate3d(${draggedLeft - initialLeft}px, 0, 0)`;
                     draggedElement.style.zIndex = '10';
                     draggedElement.style.transition = 'none';
@@ -248,20 +248,9 @@ export const TitleBar: React.FC<TitleBarProps> = React.memo(({
     const platform = ipcRenderer?.platform;
     const isMac = platform === 'darwin';
     const isWin = platform === 'win32';
-    const showCustomControls = !isMac && !isWin;
 
-    const [isMaximized, setIsMaximized] = React.useState(false);
 
-    React.useEffect(() => {
-        if (showCustomControls && ipcRenderer?.onWindowMaximizedState) {
-            const unsub = ipcRenderer.onWindowMaximizedState((maximized: boolean) => {
-                setIsMaximized(maximized);
-            });
-            return () => {
-                if (typeof unsub === 'function') unsub();
-            };
-        }
-    }, [showCustomControls]);
+
 
     const rightPadding = isMac
         ? '8px'
@@ -513,44 +502,6 @@ export const TitleBar: React.FC<TitleBarProps> = React.memo(({
                     </div>
                 )}
                 {isOnboarding && <div style={{ flex: 1 }} />}
-
-                {showCustomControls && (
-                    <div className="window-controls-container">
-                        <button
-                            className="window-control-btn"
-                            onClick={() => ipcRenderer?.minimize?.()}
-                            title="Minimize"
-                        >
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M4 10H16" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-                            </svg>
-                        </button>
-                        <button
-                            className="window-control-btn"
-                            onClick={() => ipcRenderer?.maximize?.()}
-                            title={isMaximized ? "Restore" : "Maximize"}
-                        >
-                            {isMaximized ? (
-                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M6.5 6.5V4.5H15.5V13.5H13.5M4.5 6.5H13.5V15.5H4.5V6.5Z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
-                                </svg>
-                            ) : (
-                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <rect x="4.5" y="4.5" width="11" height="11" stroke="currentColor" strokeWidth="1.2" rx="1" />
-                                </svg>
-                            )}
-                        </button>
-                        <button
-                            className="window-control-btn close"
-                            onClick={() => ipcRenderer?.close?.()}
-                            title="Close"
-                        >
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M5 5L15 15M15 5L5 15" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-                            </svg>
-                        </button>
-                    </div>
-                )}
             </div>
         </div>
     );
