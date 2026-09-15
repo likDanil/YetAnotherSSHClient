@@ -57,7 +57,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
                                 {action.cancelLabel || 'Отмена'}
                             </button>
                             <button
-                                className="btn-primary"
+                                className="btn-primary on-color-fill"
                                 style={{ flex: 1, padding: '12px', borderRadius: '8px', fontWeight: 'bold', background: '#ef4444' }}
                                 onClick={() => {
                                     action.onClick();

@@ -124,6 +124,7 @@ export const SettingsView: React.FC<SettingsViewProps> = React.memo(({ config, s
 
     const appShortcuts = useMemo(() => [
         { label: t('settings.closeTabShortcut'), key: isMac ? 'Cmd + W' : 'Ctrl + W' },
+        { label: t('settings.searchServersShortcut'), key: isMac ? 'Cmd + K' : 'Ctrl + K' },
         { label: t('settings.nextTabShortcut'), key: 'Ctrl + Tab' },
         { label: t('settings.prevTabShortcut'), key: 'Ctrl + Shift + Tab' },
     ], [t, isMac]);

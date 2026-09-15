@@ -98,12 +98,12 @@ export const PortForwardingView: React.FC<PortForwardingViewProps> = ({ sshConfi
                 margin: '0 auto'
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px' }}>
-                    <div style={{
+                    <div className="accent-icon-tile" style={{
                         width: '50px',
                         height: '50px',
                         borderRadius: '12px',
                         background: 'var(--primary-color)',
-                        color: 'white',
+                        color: 'var(--accent-contrast, #fff)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',

@@ -103,7 +103,7 @@ input, select, textarea {
 
 ::selection {
   background-color: var(--accent);
-  color: white;
+  color: var(--accent-contrast, white);
 }
 
 /* Scrollbar */

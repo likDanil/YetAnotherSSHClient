@@ -1127,7 +1127,7 @@ export const SFTPBrowser: React.FC<Props> = ({id, config, visible, onEditConfig,
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center',
-                                            color: '#fff',
+                                            color: 'var(--accent-contrast, #fff)',
                                             zIndex: 2,
                                             position: 'relative'
                                         }}>
@@ -1154,7 +1154,7 @@ export const SFTPBrowser: React.FC<Props> = ({id, config, visible, onEditConfig,
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center',
-                                            color: isConnected ? '#fff' : 'var(--text-secondary)',
+                                            color: isConnected ? 'var(--accent-contrast, #fff)' : 'var(--text-secondary)',
                                             zIndex: 2,
                                             border: isConnected ? 'none' : '1px solid var(--border)',
                                             transition: 'all 0.5s ease'

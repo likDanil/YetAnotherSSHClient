@@ -1,0 +1,628 @@
+/* Главный экран: список серверов */
+
+.home-view {
+    position: relative;
+    height: 100%;
+    overflow-y: auto;
+    padding: 34px 40px 28px;
+    user-select: none;
+    background:
+        radial-gradient(55% 45% at 100% 100%, color-mix(in srgb, var(--text-primary) 5%, transparent) 0%, transparent 70%),
+        var(--background);
+}
+
+.home-view-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+    max-width: 1680px;
+    min-height: 100%;
+    margin: 0 auto;
+}
+
+/* ---------- Заголовок и действия ---------- */
+
+.home-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.home-heading {
+    min-width: 0;
+}
+
+.home-title {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--text-primary);
+}
+
+.home-subtitle {
+    margin-top: 6px;
+    font-size: 1rem;
+    color: var(--text-secondary);
+}
+
+.home-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-left: auto;
+}
+
+.home-view-toggle {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 44px;
+    padding: 4px;
+    border-radius: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.home-view-toggle-btn {
+    width: 38px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: transparent;
+    border: 1px solid transparent !important;
+    border-radius: 9px !important;
+    color: var(--text-secondary);
+    transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.home-view-toggle-btn:hover {
+    color: var(--text-primary);
+    background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+}
+
+.home-view-toggle-btn.active {
+    color: var(--text-primary);
+    background: color-mix(in srgb, var(--text-primary) 11%, transparent);
+    border-color: color-mix(in srgb, var(--text-primary) 8%, transparent) !important;
+}
+
+.home-search {
+    position: relative;
+    width: 340px;
+    max-width: 100%;
+}
+
+.home-search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    pointer-events: none;
+}
+
+.home-search input {
+    width: 100%;
+    height: 44px;
+    padding: 0 76px 0 42px;
+    border-radius: 12px !important;
+    font-size: 0.98rem;
+    background: var(--surface);
+}
+
+.home-search-kbd {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    height: 24px;
+    padding: 0 8px;
+    border-radius: 6px;
+    font-family: var(--ui-font-family);
+    font-size: 0.74rem;
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--text-secondary);
+    background: color-mix(in srgb, var(--text-primary) 7%, transparent);
+    border: 1px solid var(--border);
+    pointer-events: none;
+}
+
+.home-add-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 44px;
+    padding: 0 18px;
+    white-space: nowrap;
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, var(--text-primary) 12%, transparent) !important;
+    border-radius: 12px !important;
+    color: var(--text-primary);
+    font-size: 0.98rem;
+    font-weight: 600;
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-primary) 7%, transparent);
+    transition: background-color 0.18s ease, border-color 0.18s ease;
+}
+
+.home-add-btn:hover {
+    background: var(--hover-surface);
+    border-color: color-mix(in srgb, var(--text-primary) 22%, transparent) !important;
+}
+
+/* ---------- Сетка карточек ---------- */
+
+.home-grid {
+    display: grid;
+    gap: 22px;
+}
+
+.home-grid.standard {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+.home-grid.medium {
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+}
+
+.home-grid.compact {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 10px;
+}
+
+/* ---------- Карточка сервера ---------- */
+
+.home-view .server-card {
+    position: relative;
+    display: flex;
+    min-width: 0;
+    cursor: pointer;
+    color: var(--text-primary);
+    background: linear-gradient(180deg,
+        color-mix(in srgb, var(--surface) 93%, var(--text-primary)) 0%,
+        var(--surface) 60%);
+    border: 1px solid var(--border);
+    box-shadow:
+        0 10px 28px rgba(0, 0, 0, 0.14),
+        inset 0 1px 0 color-mix(in srgb, var(--text-primary) 6%, transparent);
+    contain: layout style;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.home-view .server-card:hover {
+    border-color: color-mix(in srgb, var(--text-primary) 38%, transparent);
+    box-shadow:
+        0 14px 34px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 color-mix(in srgb, var(--text-primary) 10%, transparent);
+}
+
+.server-card.standard {
+    flex-direction: column;
+    gap: 14px;
+    min-height: 196px;
+    padding: 20px 20px 18px;
+    border-radius: 18px;
+}
+
+.server-card.medium {
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    min-height: 104px;
+    padding: 18px;
+    border-radius: 16px;
+}
+
+.server-card.compact {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    min-height: 52px;
+    padding: 8px 10px 8px 12px;
+    border-radius: 12px;
+}
+
+.home-view .server-card.compact {
+    box-shadow: none;
+}
+
+.server-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.server-card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+    color: var(--text-secondary);
+}
+
+.server-card-icon img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.server-card-icon.is-fallback {
+    background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+    border: 1px solid var(--border);
+}
+
+.server-card.standard .server-card-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+}
+
+.server-card.medium .server-card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+}
+
+.server-card.compact .server-card-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+}
+
+.server-card-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.server-card-status {
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.16);
+}
+
+.server-card-menu-btn {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: transparent;
+    border: 1px solid transparent !important;
+    border-radius: 8px !important;
+    color: var(--text-secondary);
+    opacity: 0.7;
+    transition: opacity 0.18s ease, background-color 0.18s ease, color 0.18s ease;
+}
+
+.server-card:hover .server-card-menu-btn {
+    opacity: 1;
+}
+
+.server-card-menu-btn:hover {
+    color: var(--text-primary);
+    background: color-mix(in srgb, var(--text-primary) 9%, transparent);
+}
+
+.server-card-body {
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+}
+
+.server-card-name {
+    font-size: 1.14rem;
+    font-weight: 600;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.server-card.compact .server-card-name {
+    font-size: 0.95rem;
+}
+
+.server-card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.server-card.medium .server-card-tags {
+    margin-top: 6px;
+}
+
+.server-card-tag {
+    padding: 3px 9px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--text-secondary);
+    background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+    border: 1px solid var(--border);
+}
+
+.server-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    margin-top: auto;
+}
+
+.server-card-host {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    color: var(--text-secondary);
+    font-family: var(--mono-font-family), monospace;
+    font-size: 0.92rem;
+}
+
+.server-card-host svg {
+    flex-shrink: 0;
+}
+
+.server-card-host span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.server-card.medium .server-card-host {
+    margin-top: 8px;
+    font-size: 0.86rem;
+}
+
+.server-card.compact .server-card-host {
+    margin-top: 2px;
+    gap: 5px;
+    font-size: 0.78rem;
+}
+
+.server-card-go {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    color: var(--text-primary);
+    background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+    border: 1px solid var(--border) !important;
+    border-radius: 50% !important;
+    transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.server-card-go:hover {
+    background: color-mix(in srgb, var(--text-primary) 14%, transparent);
+    border-color: color-mix(in srgb, var(--text-primary) 25%, transparent) !important;
+}
+
+.server-card:hover .server-card-go {
+    transform: translateX(2px);
+}
+
+/* ---------- Карточка «Добавить сервер» ---------- */
+
+.home-view .add-card {
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    text-align: center;
+    background: transparent;
+    border: 1.5px dashed color-mix(in srgb, var(--text-primary) 18%, transparent);
+    box-shadow: none;
+}
+
+.home-view .add-card:hover {
+    background: color-mix(in srgb, var(--text-primary) 3%, transparent);
+    border-color: color-mix(in srgb, var(--text-primary) 38%, transparent);
+    box-shadow: none;
+}
+
+.add-card-circle {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: var(--text-primary);
+    background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+    border: 1px solid var(--border);
+    transition: background-color 0.18s ease;
+}
+
+.home-view .add-card:hover .add-card-circle {
+    background: color-mix(in srgb, var(--text-primary) 14%, transparent);
+}
+
+.add-card-title {
+    font-size: 1.07rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.add-card-hint {
+    margin-top: 4px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.home-view .add-card.medium,
+.home-view .add-card.compact {
+    justify-content: flex-start;
+    text-align: left;
+}
+
+.add-card.compact .add-card-circle {
+    width: 26px;
+    height: 26px;
+}
+
+.add-card.compact .add-card-title {
+    font-size: 0.95rem;
+}
+
+.add-card.compact .add-card-hint {
+    display: none;
+}
+
+/* ---------- Нижняя строка ---------- */
+
+.home-footer {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-top: auto;
+    padding-top: 8px;
+}
+
+.home-tagline {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    max-width: 560px;
+    padding: 16px 22px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: linear-gradient(90deg, color-mix(in srgb, var(--text-primary) 5%, transparent) 0%, transparent 85%);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.45;
+}
+
+.home-tagline-icon {
+    flex-shrink: 0;
+    color: var(--text-primary);
+    opacity: 0.85;
+}
+
+.home-tagline-link {
+    padding: 0;
+    background: none;
+    border: none !important;
+    color: var(--accent);
+    font-size: inherit;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+
+.home-tagline-link:hover {
+    opacity: 0.85;
+}
+
+/* ---------- Иллюстрация ---------- */
+
+.home-illustration {
+    width: 230px;
+    height: auto;
+    flex-shrink: 0;
+    margin-right: -12px;
+    pointer-events: none;
+}
+
+.home-illustration .illu-halo {
+    fill: color-mix(in srgb, var(--text-primary) 5%, transparent);
+}
+
+.home-illustration .illu-shadow {
+    fill: rgba(0, 0, 0, 0.35);
+}
+
+.home-illustration .illu-top,
+.home-illustration .illu-top-muted,
+.home-illustration .illu-left,
+.home-illustration .illu-right {
+    stroke-width: 5;
+    stroke-linejoin: round;
+}
+
+.home-illustration .illu-top {
+    fill: color-mix(in srgb, var(--surface) 84%, var(--text-primary));
+    stroke: color-mix(in srgb, var(--surface) 84%, var(--text-primary));
+}
+
+.home-illustration .illu-top-muted {
+    fill: color-mix(in srgb, var(--background) 96%, var(--text-primary));
+    stroke: color-mix(in srgb, var(--background) 96%, var(--text-primary));
+}
+
+.home-illustration .illu-left {
+    fill: color-mix(in srgb, var(--background) 94%, var(--text-primary));
+    stroke: color-mix(in srgb, var(--background) 94%, var(--text-primary));
+}
+
+.home-illustration .illu-right {
+    fill: color-mix(in srgb, var(--background) 90%, var(--text-primary));
+    stroke: color-mix(in srgb, var(--background) 90%, var(--text-primary));
+}
+
+.home-illustration .illu-edge {
+    fill: none;
+    stroke: color-mix(in srgb, var(--text-primary) 24%, transparent);
+    stroke-width: 1.2;
+    stroke-linejoin: round;
+}
+
+.home-illustration .illu-strip {
+    stroke: color-mix(in srgb, var(--text-primary) 60%, transparent);
+    stroke-width: 2.4;
+    stroke-linecap: round;
+}
+
+.home-illustration .illu-led {
+    fill: #4ade80;
+}
+
+.home-illustration .illu-led-glow {
+    fill: #22c55e;
+    opacity: 0.85;
+}
+
+/* ---------- Адаптивность ---------- */
+
+@media (max-width: 1180px) {
+    .home-illustration {
+        display: none;
+    }
+}
+
+@media (max-width: 760px) {
+    .home-view {
+        padding: 24px 20px;
+    }
+
+    .home-actions,
+    .home-search {
+        width: 100%;
+    }
+}

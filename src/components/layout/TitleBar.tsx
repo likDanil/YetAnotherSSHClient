@@ -1,8 +1,8 @@
 import React from 'react';
-import { Home, Settings, Plus, Heart, Terminal, X } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 
 import type { Tab, AppConfig } from '../../types';
-import { useUpdateChecker } from '../../hooks/useUpdateChecker';
+import { useI18n } from '../../utils/i18n';
 
 const { ipcRenderer } = window;
 
@@ -14,12 +14,12 @@ interface TitleBarProps {
     setActiveView: (view: 'home' | 'settings' | 'tab' | 'support') => void;
     closeTab: (e: React.MouseEvent, id: string) => void;
     onTabContextMenu?: (e: React.MouseEvent | { clientX: number, clientY: number }, tab: Tab) => void;
-    updater: ReturnType<typeof useUpdateChecker>;
     menuRef: React.RefObject<HTMLDivElement | null>;
     appConfig?: AppConfig;
     isOnboarding?: boolean;
     setTabs?: (updater: (prev: Tab[]) => Tab[]) => void;
-    onOpenLocalTerminal?: () => void;
+    /** Открывает вкладку нового подключения (кнопка «+» рядом с вкладками) */
+    onNewConnection: () => void;
 }
 
 export const TitleBar: React.FC<TitleBarProps> = React.memo(({
@@ -30,14 +30,13 @@ export const TitleBar: React.FC<TitleBarProps> = React.memo(({
     setActiveView,
     closeTab,
     onTabContextMenu,
-    updater,
     menuRef,
     appConfig,
     isOnboarding = false,
     setTabs,
-    onOpenLocalTerminal
+    onNewConnection
 }) => {
-    const { isUpdateAvailable: hasUpdate } = updater;
+    const { t } = useI18n(appConfig?.language);
     const hoverTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
     React.useEffect(() => {
@@ -285,114 +284,6 @@ export const TitleBar: React.FC<TitleBarProps> = React.memo(({
                 <img src="./icons/48x48.png" style={{ width: '20px', height: '20px', marginRight: '8px' }}
                     alt="Logo" draggable="false" />
 
-                {!isOnboarding && (
-                    <>
-                        <button
-                            className={`nav-item ${activeView === 'home' ? 'active' : ''}`}
-                            onClick={() => setActiveView('home')}
-                            style={{
-                                width: '28px',
-                                height: '28px',
-                                padding: 0,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                borderRadius: '4px',
-                                background: 'transparent',
-                                border: 'none',
-                                color: 'var(--text-primary)',
-                                cursor: 'pointer',
-                                transition: 'background-color 0.2s, color 0.2s',
-                                WebkitAppRegion: 'no-drag'
-                            } as React.CSSProperties}
-                        >
-                            <Home size={20} />
-                        </button>
-
-                        {onOpenLocalTerminal && (
-                            <button
-                                className="nav-item"
-                                onClick={onOpenLocalTerminal}
-                                style={{
-                                    width: '28px',
-                                    height: '28px',
-                                    padding: 0,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    borderRadius: '4px',
-                                    background: 'transparent',
-                                    border: 'none',
-                                    color: 'var(--text-primary)',
-                                    cursor: 'pointer',
-                                    transition: 'background-color 0.2s, color 0.2s',
-                                    WebkitAppRegion: 'no-drag'
-                                } as React.CSSProperties}
-                            >
-                                <Terminal size={20} />
-                            </button>
-                        )}
-
-                        <button
-                            className={`nav-item ${activeView === 'settings' ? 'active' : ''}`}
-                            onClick={() => setActiveView('settings')}
-                            style={{
-                                width: '28px',
-                                height: '28px',
-                                padding: 0,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                borderRadius: '4px',
-                                background: 'transparent',
-                                border: 'none',
-                                color: 'var(--text-primary)',
-                                cursor: 'pointer',
-                                transition: 'background-color 0.2s, color 0.2s',
-                                WebkitAppRegion: 'no-drag',
-                                position: 'relative'
-                            } as React.CSSProperties}
-                        >
-                            <Settings size={20} />
-                            {hasUpdate && (
-                                <span style={{
-                                    position: 'absolute',
-                                    top: '2px',
-                                    right: '2px',
-                                    width: '10px',
-                                    height: '10px',
-                                    borderRadius: '50%',
-                                    backgroundColor: '#EFC55A',
-                                    pointerEvents: 'none'
-                                }} />
-                            )}
-                        </button>
-
-                        <button
-                            className={`nav-item ${activeView === 'support' ? 'active' : ''}`}
-                            onClick={() => setActiveView('support')}
-                            style={{
-                                width: '28px',
-                                height: '28px',
-                                padding: 0,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                borderRadius: '4px',
-                                background: 'transparent',
-                                border: 'none',
-                                color: activeView === 'support' ? '#ef4444' : 'var(--text-primary)',
-                                cursor: 'pointer',
-                                transition: 'background-color 0.2s, color 0.2s',
-                                WebkitAppRegion: 'no-drag'
-                            } as React.CSSProperties}
-                        >
-                            <Heart size={20} fill={activeView === 'support' ? 'currentColor' : 'none'} />
-                        </button>
-                    </>
-                )}
-
-                <div style={{ width: '1px', height: '16px', background: 'var(--border)', margin: '0 6px', display: isOnboarding ? 'none' : 'block' }} />
 
                 {!isOnboarding && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '3px', flex: 1, minWidth: 0, height: '100%' }}>
@@ -436,7 +327,7 @@ export const TitleBar: React.FC<TitleBarProps> = React.memo(({
                                             fontSize: '0.95rem',
                                             fontWeight: 500,
                                             background: useActiveColor ? 'var(--accent)' : (isActive || alwaysHover ? 'var(--hover-surface)' : 'transparent'),
-                                            color: useActiveColor ? 'white' : (isActive ? 'var(--text-primary)' : 'var(--text-secondary)'),
+                                            color: useActiveColor ? 'var(--accent-contrast, #fff)' : (isActive ? 'var(--text-primary)' : 'var(--text-secondary)'),
                                             transition: 'background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s',
                                             whiteSpace: 'nowrap',
                                             minWidth: '48px',
@@ -470,7 +361,9 @@ export const TitleBar: React.FC<TitleBarProps> = React.memo(({
                         </div>
                         <button
                             className="add-tab-btn"
-                            onClick={() => setActiveView('home')}
+                            onClick={onNewConnection}
+                            title={t('tabs.newConnection')}
+                            aria-label={t('tabs.newConnection')}
                             style={{
                                 width: '28px',
                                 height: '28px',

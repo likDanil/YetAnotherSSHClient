@@ -80,7 +80,7 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({ config, onUpdate
                     padding: '24px 32px 14px',
                     textAlign: 'center'
                 }}>
-                    <div style={{
+                    <div className="accent-icon-tile" style={{
                         width: '44px',
                         height: '44px',
                         background: 'linear-gradient(135deg, var(--accent) 0%, #3b82f6 100%)',
@@ -89,7 +89,7 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({ config, onUpdate
                         alignItems: 'center',
                         justifyContent: 'center',
                         margin: '0 auto 12px',
-                        color: 'white',
+                        color: 'var(--accent-contrast, #fff)',
                         boxShadow: '0 6px 12px rgba(var(--accent-rgb, 59, 130, 246), 0.25)'
                     }}>
                         <Sparkles size={22} />
@@ -245,7 +245,7 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({ config, onUpdate
                                     padding: '24px',
                                     borderRadius: '16px',
                                     background: (config.theme === 'Light' || (config.theme === 'Auto' && !window.matchMedia('(prefers-color-scheme: dark)').matches)) ? '#f8fafc' :
-                                               (config.theme === 'Dark' || (config.theme === 'Auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)) ? '#0f172a' :
+                                               (config.theme === 'Dark' || (config.theme === 'Auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)) ? '#131519' :
                                                config.theme === 'Windows Terminal' ? '#0c0c0c' :
                                                config.theme === 'Gruvbox Dark' ? '#282828' : 'var(--hover-surface)',
                                     border: '1px solid var(--border)',
@@ -447,7 +447,7 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({ config, onUpdate
                         gap: '8px',
                         fontWeight: 600,
                         background: 'var(--accent)',
-                        color: 'white',
+                        color: 'var(--accent-contrast, #fff)',
                         border: 'none',
                         cursor: 'pointer'
                     }} onClick={nextStep}>

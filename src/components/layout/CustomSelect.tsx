@@ -101,7 +101,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = React.memo(({ value, on
                                     cursor: 'pointer',
                                     transition: 'background-color 0.15s ease, color 0.15s ease',
                                     backgroundColor: value === option.value ? 'var(--accent)' : 'transparent',
-                                    color: value === option.value ? '#fff' : 'var(--text-primary)',
+                                    color: value === option.value ? 'var(--accent-contrast, #fff)' : 'var(--text-primary)',
                                     fontWeight: value === option.value ? '600' : 'normal',
                                     marginBottom: '2px',
                                     fontSize: '1rem'

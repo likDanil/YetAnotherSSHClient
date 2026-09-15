@@ -1,0 +1,298 @@
+/* Основная навигация приложения (левая панель) */
+
+.app-nav {
+    --app-nav-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 256px;
+    height: 100%;
+    flex-shrink: 0;
+    padding: 22px 14px 14px;
+    overflow: hidden;
+    user-select: none;
+    background:
+        radial-gradient(130% 48% at 0% 100%, color-mix(in srgb, var(--text-primary) 7%, transparent) 0%, transparent 65%),
+        radial-gradient(80% 30% at 100% 0%, color-mix(in srgb, var(--text-primary) 4%, transparent) 0%, transparent 70%),
+        var(--surface);
+    border-right: 1px solid var(--border);
+    border-top-right-radius: 24px;
+    transition: width 0.22s var(--app-nav-ease), padding 0.22s var(--app-nav-ease), gap 0.22s var(--app-nav-ease);
+}
+
+/* Мягкая дуга-блик в нижней части панели */
+.app-nav::before {
+    content: '';
+    position: absolute;
+    left: -70%;
+    bottom: -42%;
+    width: 200%;
+    height: 72%;
+    border-radius: 50%;
+    border-top: 1px solid color-mix(in srgb, var(--text-primary) 9%, transparent);
+    pointer-events: none;
+}
+
+.app-nav > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* ---------- Бренд ---------- */
+
+.app-nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    padding: 2px;
+}
+
+.app-nav-brand-icon {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    color: var(--text-primary);
+    background: linear-gradient(145deg,
+        color-mix(in srgb, var(--surface) 80%, var(--text-primary)) 0%,
+        color-mix(in srgb, var(--surface) 95%, var(--text-primary)) 100%);
+    border: 1px solid color-mix(in srgb, var(--text-primary) 14%, transparent);
+    box-shadow:
+        0 6px 18px rgba(0, 0, 0, 0.22),
+        inset 0 1px 0 color-mix(in srgb, var(--text-primary) 12%, transparent);
+}
+
+.app-nav-brand-text {
+    min-width: 0;
+}
+
+.app-nav-brand-name {
+    font-size: 1.07rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.app-nav-brand-subtitle {
+    margin-top: 2px;
+    font-size: 0.76rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ---------- Пункты меню ---------- */
+
+.app-nav-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.app-nav-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    height: 46px;
+    padding: 0 14px;
+    background: transparent;
+    border: 1px solid transparent !important;
+    border-radius: 12px !important;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.app-nav-item:hover {
+    color: var(--text-primary);
+    background: color-mix(in srgb, var(--text-primary) 5%, transparent);
+}
+
+.app-nav-item.active {
+    color: var(--text-primary);
+    background: linear-gradient(180deg,
+        color-mix(in srgb, var(--text-primary) 11%, transparent) 0%,
+        color-mix(in srgb, var(--text-primary) 6%, transparent) 100%);
+    border-color: color-mix(in srgb, var(--text-primary) 10%, transparent) !important;
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-primary) 8%, transparent);
+}
+
+.app-nav-item.is-support.active {
+    color: #ef4444;
+}
+
+.app-nav-item-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.app-nav-item-dot {
+    position: absolute;
+    top: -3px;
+    right: -4px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #EFC55A;
+    box-shadow: 0 0 0 2px var(--surface);
+    pointer-events: none;
+}
+
+.app-nav-item-label {
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.app-nav-item-badge {
+    flex-shrink: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Статус внизу ---------- */
+
+.app-nav-footer {
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.app-nav-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 38px;
+    padding: 0 10px;
+    background: transparent;
+    border: 1px solid transparent !important;
+    border-radius: 10px !important;
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+    font-weight: 500;
+}
+
+button.app-nav-status {
+    cursor: pointer;
+    transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+button.app-nav-status:hover {
+    color: var(--text-primary);
+    background: color-mix(in srgb, var(--text-primary) 5%, transparent);
+}
+
+.app-nav-status-dot {
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.16);
+}
+
+.app-nav-status.has-update .app-nav-status-dot {
+    background: #EFC55A;
+    box-shadow: 0 0 0 3px rgba(239, 197, 90, 0.18);
+}
+
+.app-nav-status-label {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.app-nav-status-pulse {
+    flex-shrink: 0;
+    opacity: 0.45;
+}
+
+/* ---------- Свёрнутая панель ---------- */
+
+.app-nav.is-compact {
+    width: 68px;
+    padding: 18px 10px 12px;
+    gap: 18px;
+}
+
+.app-nav.is-compact .app-nav-brand {
+    justify-content: center;
+    padding: 0 0 14px;
+    border-bottom: 1px solid var(--border);
+}
+
+/* В узкой панели логотип не должен выглядеть как выбранный пункт меню */
+.app-nav.is-compact .app-nav-brand-icon {
+    width: 36px;
+    height: 36px;
+    color: var(--text-secondary);
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+}
+
+/* Декоративная дуга в узкой полосе выглядит как артефакт отрисовки */
+.app-nav.is-compact::before {
+    display: none;
+}
+
+.app-nav.is-compact .app-nav-brand-text,
+.app-nav.is-compact .app-nav-item-label,
+.app-nav.is-compact .app-nav-status-label,
+.app-nav.is-compact .app-nav-status-pulse {
+    display: none;
+}
+
+.app-nav.is-compact .app-nav-item {
+    justify-content: center;
+    gap: 0;
+    padding: 0;
+}
+
+.app-nav.is-compact .app-nav-item-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 5px;
+    border-radius: 999px;
+    font-size: 0.66rem;
+    line-height: 15px;
+    text-align: center;
+    background: var(--hover-surface);
+    border: 1px solid var(--border);
+}
+
+.app-nav.is-compact .app-nav-status {
+    justify-content: center;
+    padding: 0;
+}
+
+/* Стыковка с навигацией настроек: скругление берёт на себя соседняя панель */
+.app-nav.is-joined {
+    border-top-right-radius: 0;
+}

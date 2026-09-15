@@ -41,12 +41,12 @@ export const VaultUnlockModal: React.FC<VaultUnlockModalProps> = ({ onUnlock, on
         <div className="modal-overlay" style={{ zIndex: 4000 }}>
             <div className="modal-content" style={{ maxWidth: '450px', padding: '32px' }}>
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '20px' }}>
-                    <div style={{
+                    <div className="accent-icon-tile" style={{
                         width: '64px',
                         height: '64px',
                         borderRadius: '20px',
                         background: 'var(--accent)',
-                        color: 'white',
+                        color: 'var(--accent-contrast, #fff)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -89,7 +89,7 @@ export const VaultUnlockModal: React.FC<VaultUnlockModalProps> = ({ onUnlock, on
                         className="btn-primary"
                         style={{ width: '100%', padding: '14px', gap: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
                     >
-                        {loading ? <div className="loading-spinner" style={{ width: '16px', height: '16px', borderTopColor: 'white' }} /> : <Unlock size={18} />}
+                        {loading ? <div className="loading-spinner" style={{ width: '16px', height: '16px', borderTopColor: 'var(--accent-contrast, #fff)' }} /> : <Unlock size={18} />}
                         {t('vault.unlockAction')}
                     </button>
                     {!confirmReset ? (

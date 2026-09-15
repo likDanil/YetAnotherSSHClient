@@ -357,7 +357,7 @@ export const SftpModals: React.FC<SftpModalsProps> = ({
 
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '30px' }}>
                         <button
-                            className="btn-primary"
+                            className={`btn-primary ${modal.type === 'delete' || modal.type === 'permissions' ? 'on-color-fill' : ''}`}
                             onClick={onConfirm}
                             disabled={isProcessing}
                             style={{
@@ -370,7 +370,7 @@ export const SftpModals: React.FC<SftpModalsProps> = ({
                                 background: modal.type === 'delete' ? '#cc241d' : (modal.type === 'permissions' ? '#1fb466' : 'var(--primary-color)')
                             }}
                         >
-                            {isProcessing && <div className="loading-spinner" style={{ width: '16px', height: '16px', border: '2px solid transparent', borderTopColor: '#fff' }} />}
+                            {isProcessing && <div className="loading-spinner" style={{ width: '16px', height: '16px', border: '2px solid transparent', borderTopColor: modal.type === 'delete' || modal.type === 'permissions' ? '#fff' : 'var(--accent-contrast, #fff)' }} />}
                             {modal.type === 'delete' ? t('common.delete') :
                              modal.type === 'mkdir' ? t('sftp.create') :
                              modal.type === 'error' ? 'OK' :

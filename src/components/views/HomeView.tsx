@@ -1,132 +1,170 @@
-import React, { useMemo, useCallback } from 'react';
-import { Server, Plus, Search, MoreHorizontal, Globe, LayoutGrid, LayoutList, Rows } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ArrowRight, Ellipsis, Globe, LayoutGrid, LayoutList, Plus, Rows3, Search, Server, Terminal } from 'lucide-react';
 import type { SSHConfig, AppConfig, Tab } from '../../types';
 import { getOSIcon } from '../../utils';
+import { isCtrlOrCmd } from '../../utils/shortcuts';
 import { useI18n } from '../../utils/i18n';
+import './HomeView.css';
+
+const { ipcRenderer } = window;
+
+type CardSize = AppConfig['serverCardSize'];
+
+interface ServerCardLabels {
+    sessionOpen: string;
+    connect: string;
+    moreActions: string;
+}
 
 interface ServerCardProps {
     fav: SSHConfig;
-    size: 'standard' | 'compact' | 'medium';
-    onClick: () => void;
+    size: CardSize;
+    /** По серверу открыта хотя бы одна вкладка: терминал, SFTP, проброс портов или MCP */
+    hasOpenSession: boolean;
+    labels: ServerCardLabels;
+    onConnect: () => void;
     onContextMenu: (e: React.MouseEvent) => void;
 }
 
-const ServerCard = React.memo<ServerCardProps>(({ fav, size, onClick, onContextMenu }) => {
-    const isCompact = size === 'compact';
-    const isMedium = size === 'medium';
-    const isStandard = size === 'standard';
+const ServerCard = React.memo<ServerCardProps>(({ fav, size, hasOpenSession, labels, onConnect, onContextMenu }) => {
+    const title = fav.name || fav.host;
 
-    return (
-        <div
-            className={`server-card ${size}`}
-            onClick={onClick}
-            onContextMenu={onContextMenu}
-        >
-            <div className={`server-card-icon-container ${size}`}>
-                {fav.osPrettyName ? (
-                    <img
-                        src={getOSIcon(fav.osPrettyName)}
-                        style={{ width: '115%', height: '115%', objectFit: 'contain' }}
-                        draggable="false"
-                        alt={fav.osPrettyName}
-                    />
-                ) : (
-                    <Server size={isCompact ? 16 : (isMedium ? 32 : 42)} style={{ color: 'var(--text-secondary)' }} />
-                )}
-            </div>
-
-            <div className="server-card-info">
-                <div className="text-card-title" style={{
-                    marginBottom: isCompact ? '0px' : (isMedium ? '4px' : '8px'),
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    fontSize: isCompact ? '0.95rem' : '1.14rem',
-                    fontWeight: 600,
-                    lineHeight: 1.2
-                }}>
-                    {fav.name || fav.host}
-                </div>
-                {isCompact ? (
-                    <div className="server-card-host-text">
-                        {fav.host}
-                    </div>
-                ) : (
-                    <>
-                        <div className="server-card-tag-list" style={{ marginBottom: isMedium ? '4px' : '0px' }}>
-                            <div className="server-card-tag">SSH</div>
-                            <div className="server-card-tag">{fav.user.toUpperCase()}</div>
-                        </div>
-                        {isMedium && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)', fontSize: '0.9rem', fontFamily: 'var(--mono-font-family), serif' }}>
-                                <Globe size={14} />
-                                {fav.host}
-                            </div>
-                        )}
-                    </>
-                )}
-            </div>
-
-            {isStandard && (
-                <div className="server-card-meta-container">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Globe size={14} />
-                        {fav.host}
-                    </div>
-
-                    <button
-                        className="card-menu-btn"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onContextMenu(e);
-                        }}
-                        style={{
-                            background: 'transparent',
-                            border: 'none',
-                            padding: '4px',
-                            borderRadius: '6px',
-                            color: 'var(--text-secondary)',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            transition: 'background-color 0.2s, color 0.2s',
-                            marginRight: '-4px'
-                        }}
-                    >
-                        <MoreHorizontal size={18} />
-                    </button>
-                </div>
-            )}
-
-            {(isCompact || isMedium) && (
-                <button
-                    className="card-menu-btn"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onContextMenu(e);
-                    }}
-                    style={{
-                        background: 'transparent',
-                        border: 'none',
-                        padding: '8px',
-                        borderRadius: '6px',
-                        color: 'var(--text-secondary)',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'background-color 0.2s, color 0.2s',
-                        flexShrink: 0,
-                        alignSelf: 'center'
-                    }}
-                >
-                    <MoreHorizontal size={18} />
-                </button>
+    const icon = (
+        <div className={`server-card-icon ${fav.osPrettyName ? '' : 'is-fallback'}`}>
+            {fav.osPrettyName ? (
+                <img
+                    src={getOSIcon(fav.osPrettyName)}
+                    alt={fav.osPrettyName}
+                    draggable="false"
+                    loading="lazy"
+                    decoding="async"
+                />
+            ) : (
+                <Server size={size === 'compact' ? 15 : 22} />
             )}
         </div>
     );
+
+    const controls = (
+        <div className="server-card-controls">
+            {hasOpenSession && (
+                <span className="server-card-status" title={labels.sessionOpen} aria-label={labels.sessionOpen} />
+            )}
+            <button
+                type="button"
+                className="server-card-menu-btn"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onContextMenu(e);
+                }}
+                title={labels.moreActions}
+                aria-label={labels.moreActions}
+            >
+                <Ellipsis size={18} />
+            </button>
+        </div>
+    );
+
+    const tags = (
+        <div className="server-card-tags">
+            <span className="server-card-tag">SSH</span>
+            <span className="server-card-tag">{fav.user.toUpperCase()}</span>
+        </div>
+    );
+
+    const host = (
+        <div className="server-card-host">
+            <Globe size={size === 'compact' ? 12 : 15} />
+            <span>{fav.host}</span>
+        </div>
+    );
+
+    if (size === 'standard') {
+        return (
+            <div className="server-card standard" onClick={onConnect} onContextMenu={onContextMenu}>
+                <div className="server-card-top">
+                    {icon}
+                    {controls}
+                </div>
+                <div className="server-card-body">
+                    <div className="server-card-name" title={title}>{title}</div>
+                    {tags}
+                </div>
+                <div className="server-card-footer">
+                    {host}
+                    <button
+                        type="button"
+                        className="server-card-go"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onConnect();
+                        }}
+                        title={labels.connect}
+                        aria-label={labels.connect}
+                    >
+                        <ArrowRight size={16} />
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    if (size === 'medium') {
+        return (
+            <div className="server-card medium" onClick={onConnect} onContextMenu={onContextMenu}>
+                {icon}
+                <div className="server-card-body">
+                    <div className="server-card-name" title={title}>{title}</div>
+                    {tags}
+                    {host}
+                </div>
+                {controls}
+            </div>
+        );
+    }
+
+    return (
+        <div className="server-card compact" onClick={onConnect} onContextMenu={onContextMenu}>
+            {icon}
+            <div className="server-card-body">
+                <div className="server-card-name" title={title}>{title}</div>
+                {host}
+            </div>
+            {controls}
+        </div>
+    );
 });
+
+/** Декоративная изометрическая «коробка сервера». Цвета берутся из переменных темы. */
+const HomeIllustration: React.FC = () => (
+    <svg className="home-illustration" viewBox="0 0 250 180" aria-hidden="true" focusable="false">
+        <defs>
+            <filter id="home-illustration-shadow" x="-30%" y="-150%" width="160%" height="400%">
+                <feGaussianBlur stdDeviation="7" />
+            </filter>
+            <filter id="home-illustration-glow" x="-300%" y="-300%" width="700%" height="700%">
+                <feGaussianBlur stdDeviation="2.4" />
+            </filter>
+        </defs>
+        <circle className="illu-halo" cx="200" cy="52" r="46" />
+        <ellipse className="illu-shadow" cx="128" cy="162" rx="92" ry="11" filter="url(#home-illustration-shadow)" />
+
+        {/* Нижний блок */}
+        <path className="illu-left" d="M34 102 L126 138 L126 160 L34 124 Z" />
+        <path className="illu-right" d="M126 138 L218 102 L218 124 L126 160 Z" />
+        <path className="illu-top-muted" d="M34 102 L126 66 L218 102 L126 138 Z" />
+
+        {/* Верхний блок */}
+        <path className="illu-left" d="M34 70 L126 106 L126 130 L34 94 Z" />
+        <path className="illu-right" d="M126 106 L218 70 L218 94 L126 130 Z" />
+        <path className="illu-top" d="M34 70 L126 34 L218 70 L126 106 Z" />
+        <path className="illu-edge" d="M34 70 L126 106 L218 70" />
+
+        <line className="illu-strip" x1="160" y1="105" x2="202" y2="88" />
+        <circle className="illu-led-glow" cx="146" cy="110" r="4" filter="url(#home-illustration-glow)" />
+        <circle className="illu-led" cx="146" cy="110" r="2.6" />
+    </svg>
+);
 
 interface HomeViewProps {
     config: AppConfig;
@@ -136,17 +174,55 @@ interface HomeViewProps {
     searchQuery: string;
     setSearchQuery: (query: string) => void;
     onOpenSupport?: () => void;
+    /** ID серверов, по которым сейчас открыты вкладки */
+    connectedServerIds: ReadonlySet<string>;
 }
 
-export const HomeView: React.FC<HomeViewProps> = React.memo(({ config, setConfig, addTab, onContextMenu, searchQuery, setSearchQuery, onOpenSupport }) => {
+export const HomeView: React.FC<HomeViewProps> = React.memo(({
+    config,
+    setConfig,
+    addTab,
+    onContextMenu,
+    searchQuery,
+    setSearchQuery,
+    onOpenSupport,
+    connectedServerIds
+}) => {
     const { t } = useI18n(config.language);
+    const searchInputRef = useRef<HTMLInputElement>(null);
+    const isMac = ipcRenderer?.platform === 'darwin';
+    const cardSize: CardSize = config.serverCardSize || 'standard';
 
-    const handleSetStandard = useCallback(() => setConfig({ ...config, serverCardSize: 'standard' }), [config, setConfig]);
-    const handleSetMedium = useCallback(() => setConfig({ ...config, serverCardSize: 'medium' }), [config, setConfig]);
-    const handleSetCompact = useCallback(() => setConfig({ ...config, serverCardSize: 'compact' }), [config, setConfig]);
+    const handleSetSize = useCallback((size: CardSize) => {
+        if (config.serverCardSize === size) return;
+        setConfig({ ...config, serverCardSize: size });
+    }, [config, setConfig]);
+
     const handleAddServer = useCallback(() => addTab('connection', t('tabs.connection')), [addTab, t]);
 
-    const isLicensed = !!(config.licenseKey && (!config.licenseExpiresAt || config.licenseExpiresAt > Date.now()));
+    const handleSearchKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key !== 'Escape') return;
+        e.preventDefault();
+        setSearchQuery('');
+        e.currentTarget.blur();
+    }, [setSearchQuery]);
+
+    // Ctrl+K (Cmd+K на macOS) переводит фокус в поиск. Сравнение по e.code не зависит от раскладки.
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (!isCtrlOrCmd(e, isMac) || e.shiftKey || e.altKey || e.code !== 'KeyK') return;
+            e.preventDefault();
+            searchInputRef.current?.focus();
+            searchInputRef.current?.select();
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isMac]);
+
+    // Время фиксируется при монтировании: рендер остаётся чистым, а экран перемонтируется
+    // при каждом переходе на главную, так что срок лицензии проверяется актуально
+    const [mountedAt] = useState(() => Date.now());
+    const isLicensed = !!(config.licenseKey && (!config.licenseExpiresAt || config.licenseExpiresAt > mountedAt));
 
     const filteredFavorites = useMemo(() => {
         if (!searchQuery) return config.favorites;
@@ -158,228 +234,107 @@ export const HomeView: React.FC<HomeViewProps> = React.memo(({ config, setConfig
         );
     }, [config.favorites, searchQuery]);
 
-    return (
-        <div style={{
-            padding: '40px',
-            height: '100%',
-            overflowY: 'auto',
-            background: 'var(--background)',
-            userSelect: 'none'
-        }}>
-            <div style={{
-                maxWidth: '1200px',
-                margin: '0 auto'
-            }}>
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    marginBottom: '32px',
-                    gap: '20px'
-                }}>
-                    <h1 className="text-title" style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
-                        {filteredFavorites.length === 1 ? t('home.server') : t('home.servers')}
-                    </h1>
+    const viewModes = useMemo(() => [
+        { size: 'standard' as const, label: t('home.viewGrid'), icon: <LayoutGrid size={17} /> },
+        { size: 'medium' as const, label: t('home.viewCards'), icon: <LayoutList size={17} /> },
+        { size: 'compact' as const, label: t('home.viewList'), icon: <Rows3 size={17} /> },
+    ], [t]);
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, justifyContent: 'flex-end' }}>
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '2px',
-                            background: 'var(--surface)',
-                            padding: '2px',
-                            borderRadius: '8px',
-                            border: '1px solid var(--border)',
-                            marginRight: '8px',
-                            height: '36px',
-                            boxSizing: 'border-box'
-                        }}>
-                            <button
-                                onClick={handleSetStandard}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    width: '32px',
-                                    height: '32px',
-                                    borderRadius: '6px',
-                                    background: config.serverCardSize === 'standard' ? 'var(--hover-surface)' : 'transparent',
-                                    border: 'none',
-                                    color: config.serverCardSize === 'standard' ? 'var(--accent)' : 'var(--text-secondary)',
-                                    cursor: 'pointer',
-                                    transition: 'background-color 0.2s, color 0.2s'
-                                }}
-                            >
-                                <LayoutGrid size={16} />
-                            </button>
-                            <button
-                                onClick={handleSetMedium}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    width: '32px',
-                                    height: '32px',
-                                    borderRadius: '6px',
-                                    background: config.serverCardSize === 'medium' ? 'var(--hover-surface)' : 'transparent',
-                                    border: 'none',
-                                    color: config.serverCardSize === 'medium' ? 'var(--accent)' : 'var(--text-secondary)',
-                                    cursor: 'pointer',
-                                    transition: 'background-color 0.2s, color 0.2s'
-                                }}
-                            >
-                                <LayoutList size={16} />
-                            </button>
-                            <button
-                                onClick={handleSetCompact}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    width: '32px',
-                                    height: '32px',
-                                    borderRadius: '6px',
-                                    background: config.serverCardSize === 'compact' ? 'var(--hover-surface)' : 'transparent',
-                                    border: 'none',
-                                    color: config.serverCardSize === 'compact' ? 'var(--accent)' : 'var(--text-secondary)',
-                                    cursor: 'pointer',
-                                    transition: 'background-color 0.2s, color 0.2s'
-                                }}
-                            >
-                                <Rows size={16} />
-                            </button>
+    const cardLabels = useMemo<ServerCardLabels>(() => ({
+        sessionOpen: t('home.sessionOpen'),
+        connect: t('common.connect'),
+        moreActions: t('home.moreActions'),
+    }), [t]);
+
+    return (
+        <div className="home-view">
+            <div className="home-view-inner">
+                <div className="home-header">
+                    <div className="home-heading">
+                        <h1 className="home-title">
+                            {filteredFavorites.length === 1 ? t('home.server') : t('home.servers')}
+                        </h1>
+                        <div className="home-subtitle">{t('home.subtitle')}</div>
+                    </div>
+
+                    <div className="home-actions">
+                        <div className="home-view-toggle" role="group">
+                            {viewModes.map(mode => (
+                                <button
+                                    key={mode.size}
+                                    type="button"
+                                    className={`home-view-toggle-btn ${cardSize === mode.size ? 'active' : ''}`}
+                                    onClick={() => handleSetSize(mode.size)}
+                                    title={mode.label}
+                                    aria-label={mode.label}
+                                    aria-pressed={cardSize === mode.size}
+                                >
+                                    {mode.icon}
+                                </button>
+                            ))}
                         </div>
 
-                        <div style={{
-                            position: 'relative',
-                            width: '100%',
-                            maxWidth: '300px'
-                        }}>
-                            <Search size={16} style={{
-                                position: 'absolute',
-                                left: '12px',
-                                top: '50%',
-                                transform: 'translateY(-50%)',
-                                opacity: 0.5,
-                                color: 'var(--text-secondary)'
-                            }} />
+                        <div className="home-search">
+                            <Search size={17} className="home-search-icon" />
                             <input
+                                ref={searchInputRef}
                                 type="text"
-                                placeholder={t('common.search')}
+                                placeholder={t('home.searchPlaceholder')}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                style={{
-                                    width: '100%',
-                                    height: '36px',
-                                    padding: '0 12px 0 36px',
-                                    borderRadius: '8px',
-                                    background: 'var(--surface)',
-                                    border: '1px solid var(--border)',
-                                    color: 'var(--text-primary)',
-                                    fontSize: '1rem',
-                                    fontWeight: 400,
-                                    outline: 'none',
-                                    transition: 'border-color 0.2s, box-shadow 0.2s'
-                                }}
+                                onKeyDown={handleSearchKeyDown}
                             />
+                            <kbd className="home-search-kbd">{isMac ? '⌘ K' : 'Ctrl K'}</kbd>
                         </div>
 
-                        <button
-                            className="btn-primary"
-                            onClick={handleAddServer}
-                            style={{
-                                height: '36px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                                padding: '0 16px',
-                                fontSize: '1rem',
-                                borderRadius: '8px',
-                                flexShrink: 0
-                            }}
-                        >
+                        <button type="button" className="home-add-btn" onClick={handleAddServer}>
                             <Plus size={18} />
                             {t('home.addServer')}
                         </button>
                     </div>
                 </div>
 
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: config.serverCardSize === 'compact'
-                        ? 'repeat(auto-fill, minmax(240px, 1fr))'
-                        : config.serverCardSize === 'medium'
-                        ? 'repeat(auto-fill, minmax(320px, 1fr))'
-                        : 'repeat(auto-fill, minmax(280px, 1fr))',
-                    gap: config.serverCardSize === 'compact' ? '12px' : (config.serverCardSize === 'medium' ? '16px' : '24px')
-                }}>
+                <div className={`home-grid ${cardSize}`}>
                     {filteredFavorites.map((fav, i) => (
                         <ServerCard
                             key={fav.id || i}
                             fav={fav}
-                            size={config.serverCardSize || 'standard'}
-                            onClick={() => addTab('ssh', fav.name || fav.host, fav)}
+                            size={cardSize}
+                            hasOpenSession={Boolean(fav.id && connectedServerIds.has(fav.id))}
+                            labels={cardLabels}
+                            onConnect={() => addTab('ssh', fav.name || fav.host, fav)}
                             onContextMenu={(e) => onContextMenu(e, fav)}
                         />
                     ))}
 
-                    <div
-                        className={`server-card add-card ${config.serverCardSize || 'standard'}`}
-                        onClick={handleAddServer}
-                        style={{
-                            background: 'transparent',
-                            borderStyle: 'dashed',
-                        }}
-                    >
-                        <div
-                            className="add-icon-circle"
-                            style={{
-                                width: config.serverCardSize === 'compact' ? '24px' : (config.serverCardSize === 'medium' ? '36px' : '48px'),
-                                height: config.serverCardSize === 'compact' ? '24px' : (config.serverCardSize === 'medium' ? '36px' : '48px'),
-                                borderRadius: '50%',
-                                background: 'var(--hover-surface)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: 'var(--text-secondary)',
-                                flexShrink: 0
-                            }}
-                        >
-                            <Plus size={config.serverCardSize === 'compact' ? 18 : (config.serverCardSize === 'medium' ? 20 : 24)} />
+                    <div className={`server-card add-card ${cardSize}`} onClick={handleAddServer}>
+                        <div className="add-card-circle">
+                            <Plus size={cardSize === 'compact' ? 15 : 22} />
                         </div>
-                        <div className="text-card-title" style={{
-                            color: 'var(--text-secondary)',
-                            fontSize: config.serverCardSize === 'compact' ? '0.95rem' : '1.14rem'
-                        }}>
-                            {t('home.addServer')}
+                        <div className="add-card-text">
+                            <div className="add-card-title">{t('home.addServer')}</div>
+                            <div className="add-card-hint">{t('home.addServerHint')}</div>
                         </div>
                     </div>
                 </div>
 
-                {!isLicensed && (
-                    <div style={{
-                        marginTop: '36px',
-                        textAlign: 'center',
-                        fontSize: 'var(--ui-font-family)',
-                        color: 'var(--text-secondary)',
-                        paddingTop: '16px',
-                        borderTop: '1px solid var(--border)'
-                    }}>
-                        {t('home.unlicensedNotice')}
-                        <span
-                            onClick={onOpenSupport}
-                            style={{
-                                color: 'var(--accent)',
-                                cursor: 'pointer',
-                                fontWeight: 600
-                            }}
-                        >
-                            {t('home.unlicensedBuy')}
-                        </span>
+                <div className="home-footer">
+                    <div className="home-tagline">
+                        <Terminal size={26} className="home-tagline-icon" />
+                        {isLicensed ? (
+                            <span>{t('home.tagline')}</span>
+                        ) : (
+                            <span>
+                                {t('home.unlicensedNotice')}
+                                <button type="button" className="home-tagline-link" onClick={onOpenSupport}>
+                                    {t('home.unlicensedBuy')}
+                                </button>
+                            </span>
+                        )}
                     </div>
-                )}
+                    <HomeIllustration />
+                </div>
             </div>
-
         </div>
     );
 });

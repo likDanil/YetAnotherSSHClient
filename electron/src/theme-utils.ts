@@ -14,7 +14,7 @@ export function getThemeColor(theme: string): string {
     }
 
     switch (actualTheme) {
-        case 'Dark': return '#0F172A'
+        case 'Dark': return '#131519'
         case 'Gruvbox Light': return '#fbf1c7'
         case 'Gruvbox Dark': return '#282828'
         case 'Windows Terminal': return '#0C0C0C'

@@ -8,6 +8,7 @@ import { Edit2, Folder, Play, Trash2, Share2, Copy, Terminal, Bot } from 'lucide
 import { McpTab } from './components/McpTab';
 
 import { TitleBar } from './components/layout/TitleBar';
+import { AppNav } from './components/layout/AppNav';
 import { Sidebar } from './components/layout/Sidebar';
 import { ErrorBoundary } from './components/layout/ErrorBoundary';
 import { HomeView } from './components/views/HomeView';
@@ -125,6 +126,24 @@ function App() {
     const handleOpenLocalTerminal = useCallback(() => {
         addTab('local-terminal', t('localTerminal.tabTitle'));
     }, [addTab, t]);
+
+    const handleNewConnection = useCallback(() => {
+        addTab('connection', t('tabs.connection'));
+    }, [addTab, t]);
+
+    // Серверы с открытой вкладкой отмечаются индикатором на карточке
+    const connectedServerIds = useMemo(() => {
+        const ids = new Set<string>();
+        for (const tab of tabs) {
+            if (tab.type !== 'connection' && tab.config?.id) {
+                ids.add(tab.config.id);
+            }
+        }
+        return ids;
+    }, [tabs]);
+
+    const sessionCount = useMemo(() => tabs.filter(tab => tab.type !== 'connection').length, [tabs]);
+    const activeTabType = useMemo(() => tabs.find(tab => tab.id === activeTabId)?.type, [tabs, activeTabId]);
 
     const handleCloseTabShortcut = useCallback(() => {
         if (activeView === 'tab' && activeTabId) {
@@ -634,171 +653,187 @@ function App() {
                 setActiveView={setActiveView}
                 closeTab={closeTab}
                 onTabContextMenu={handleTabContextMenu}
-                updater={updater}
                 menuRef={menuRef}
                 appConfig={config}
                 isOnboarding={!config.isOnboardingCompleted}
                 setTabs={setTabs}
-                onOpenLocalTerminal={handleOpenLocalTerminal}
+                onNewConnection={handleNewConnection}
             />
 
-            <div className={`app-body-container ${config.sidebarPosition === 'right' ? 'reverse' : ''}`}>
-                {config.sidebarEnabled && activeView === 'tab' && (
-                    <Sidebar
-                        config={config}
-                        addTab={addTab}
-                        onContextMenu={(e, fav) => {
-                            e.preventDefault();
-                            setContextMenu({ x: e.clientX, y: e.clientY, config: fav });
-                        }}
+            <div className="app-shell">
+                {config.isOnboardingCompleted && (
+                    <AppNav
+                        activeView={activeView}
+                        activeTabType={activeTabType}
+                        serverCount={config.favorites.length}
+                        sessionCount={sessionCount}
+                        hasUpdate={updater.isUpdateAvailable}
+                        compact={activeView === 'tab' || activeView === 'settings'}
+                        joined={activeView === 'settings'}
+                        onNavigate={setActiveView}
+                        onOpenConsole={handleOpenLocalTerminal}
+                        t={t}
                     />
                 )}
-                <div className="main-content" style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                <div className={`app-body-container ${config.sidebarPosition === 'right' ? 'reverse' : ''}`}>
+                    {config.sidebarEnabled && activeView === 'tab' && (
+                        <Sidebar
+                            config={config}
+                            addTab={addTab}
+                            onContextMenu={(e, fav) => {
+                                e.preventDefault();
+                                setContextMenu({ x: e.clientX, y: e.clientY, config: fav });
+                            }}
+                        />
+                    )}
+                    <div className="main-content" style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
 
-                    <div className="view-viewport-container">
-                        {!vaultStatus.isUnlocked && vaultStatus.isInitialized && config.isOnboardingCompleted && (
-                            <VaultUnlockModal
-                                onUnlock={handleVaultUnlock}
-                                onResetPasswords={handleVaultResetPasswords}
-                                appConfig={config}
-                            />
-                        )}
+                        <div className="view-viewport-container">
+                            {!vaultStatus.isUnlocked && vaultStatus.isInitialized && config.isOnboardingCompleted && (
+                                <VaultUnlockModal
+                                    onUnlock={handleVaultUnlock}
+                                    onResetPasswords={handleVaultResetPasswords}
+                                    appConfig={config}
+                                />
+                            )}
 
-                        {recoveryKeyToShow && (
-                            <RecoveryKeyModal
-                                recoveryKey={recoveryKeyToShow}
-                                appConfig={config}
-                                onConfirm={() => {
-                                    setRecoveryKeyModal(null);
-                                    setConfig(prev => prev ? { ...prev, hasAcknowledgedRecoveryKey: true } : null);
-                                }}
-                            />
-                        )}
+                            {recoveryKeyToShow && (
+                                <RecoveryKeyModal
+                                    recoveryKey={recoveryKeyToShow}
+                                    appConfig={config}
+                                    onConfirm={() => {
+                                        setRecoveryKeyModal(null);
+                                        setConfig(prev => prev ? { ...prev, hasAcknowledgedRecoveryKey: true } : null);
+                                    }}
+                                />
+                            )}
 
-                        {!config.isOnboardingCompleted && (
-                            <OnboardingView
-                                config={config}
-                                onUpdate={(updates) => setConfig({ ...config, ...updates })}
-                                onComplete={handleOnboardingComplete}
-                                systemFonts={systemFonts}
-                            />
-                        )}
+                            {!config.isOnboardingCompleted && (
+                                <OnboardingView
+                                    config={config}
+                                    onUpdate={(updates) => setConfig({ ...config, ...updates })}
+                                    onComplete={handleOnboardingComplete}
+                                    systemFonts={systemFonts}
+                                />
+                            )}
 
-                        {config.isOnboardingCompleted && activeView === 'home' && (
-                            <HomeView
-                                config={config}
-                                setConfig={setConfig}
-                                addTab={addTab}
-                                searchQuery={searchQuery}
-                                setSearchQuery={setSearchQuery}
-                                onContextMenu={(e, fav) => {
-                                    e.preventDefault();
-                                    setContextMenu({ x: e.clientX, y: e.clientY, config: fav });
-                                }}
-                                onOpenSupport={() => setActiveView('support')}
-                            />
-                        )}
+                            {config.isOnboardingCompleted && activeView === 'home' && (
+                                <HomeView
+                                    config={config}
+                                    setConfig={setConfig}
+                                    addTab={addTab}
+                                    searchQuery={searchQuery}
+                                    setSearchQuery={setSearchQuery}
+                                    onContextMenu={(e, fav) => {
+                                        e.preventDefault();
+                                        setContextMenu({ x: e.clientX, y: e.clientY, config: fav });
+                                    }}
+                                    onOpenSupport={() => setActiveView('support')}
+                                    connectedServerIds={connectedServerIds}
+                                />
+                            )}
 
-                        {config.isOnboardingCompleted && activeView === 'settings' && (
-                            <SettingsView
-                                config={config}
-                                setConfig={setConfig}
-                                systemFonts={systemFonts}
-                                showNotification={showNotification}
-                                refreshVaultStatus={refreshVaultStatus}
-                            />
-                        )}
+                            {config.isOnboardingCompleted && activeView === 'settings' && (
+                                <SettingsView
+                                    config={config}
+                                    setConfig={setConfig}
+                                    systemFonts={systemFonts}
+                                    showNotification={showNotification}
+                                    refreshVaultStatus={refreshVaultStatus}
+                                />
+                            )}
 
-                        {config.isOnboardingCompleted && activeView === 'support' && (
-                            <SupportView
-                                config={config}
-                                setConfig={setConfig}
-                                showNotification={showNotification}
-                            />
-                        )}
+                            {config.isOnboardingCompleted && activeView === 'support' && (
+                                <SupportView
+                                    config={config}
+                                    setConfig={setConfig}
+                                    showNotification={showNotification}
+                                />
+                            )}
 
-                        {config.isOnboardingCompleted && tabs.map(tab => (
-                            <div key={tab.id}
-                                className={activeView === 'tab' && activeTabId === tab.id ? 'tab-content-active' : ''}
-                                style={{
-                                    display: activeView === 'tab' && activeTabId === tab.id ? 'block' : 'none',
-                                    height: '100%',
-                                    width: '100%'
-                                }}>
-                                {tab.type === 'ssh' && tab.config && (
-                                    tab.subType === 'port-forwarding' ? (
-                                        <PortForwardingView
-                                            sshConfig={tab.config}
-                                            theme={config.theme}
-                                            language={config.language}
-                                        />
-                                    ) : (
-                                        <TerminalComponent
+                            {config.isOnboardingCompleted && tabs.map(tab => (
+                                <div key={tab.id}
+                                    className={activeView === 'tab' && activeTabId === tab.id ? 'tab-content-active' : ''}
+                                    style={{
+                                        display: activeView === 'tab' && activeTabId === tab.id ? 'block' : 'none',
+                                        height: '100%',
+                                        width: '100%'
+                                    }}>
+                                    {tab.type === 'ssh' && tab.config && (
+                                        tab.subType === 'port-forwarding' ? (
+                                            <PortForwardingView
+                                                sshConfig={tab.config}
+                                                theme={config.theme}
+                                                language={config.language}
+                                            />
+                                        ) : (
+                                            <TerminalComponent
+                                                id={tab.id}
+                                                theme={resolvedTheme}
+                                                config={tab.config}
+                                                terminalFontName={config.terminalFontName}
+                                                terminalFontSize={config.terminalFontSize}
+                                                terminalScrollSensitivity={config.terminalScrollSensitivity}
+                                                keywordHighlighting={config.keywordHighlighting}
+                                                visible={activeTabId === tab.id}
+                                                onOSInfo={(info) => handleOSInfo(tab.config!, info)}
+                                                enableContextMenu={config.enableTerminalContextMenu}
+                                                onEditConfig={handleEditConnection}
+                                                onClose={() => closeTab({ stopPropagation: () => { } } as React.MouseEvent, tab.id)}
+                                                appConfig={config}
+                                                aiOpen={tab.aiOpen}
+                                                aiMessages={tab.aiMessages}
+                                                onToggleAi={() => toggleAi(tab.id)}
+                                                onAiMessagesChange={(msgs) => setAiMessages(tab.id, msgs)}
+                                                aiFocusTrigger={tab.aiFocusTrigger}
+                                                onAlternateScreenChange={setActiveTabIsAltScreen}
+                                            />
+                                        )
+                                    )}
+                                    {tab.type === 'local-terminal' && (
+                                        <LocalTerminalComponent
                                             id={tab.id}
                                             theme={resolvedTheme}
-                                            config={tab.config}
                                             terminalFontName={config.terminalFontName}
                                             terminalFontSize={config.terminalFontSize}
                                             terminalScrollSensitivity={config.terminalScrollSensitivity}
-                                            keywordHighlighting={config.keywordHighlighting}
-                                            visible={activeTabId === tab.id}
-                                            onOSInfo={(info) => handleOSInfo(tab.config!, info)}
+                                            visible={activeView === 'tab' && activeTabId === tab.id}
                                             enableContextMenu={config.enableTerminalContextMenu}
+                                            appConfig={config}
+                                            onClose={() => closeTab({ stopPropagation: () => { } } as React.MouseEvent, tab.id)}
+                                            onAlternateScreenChange={setActiveTabIsAltScreen}
+                                        />
+                                    )}
+                                    {tab.type === 'sftp' && tab.config && (
+                                        <SFTPBrowser
+                                            id={tab.id}
+                                            config={tab.config}
+                                            visible={activeTabId === tab.id}
                                             onEditConfig={handleEditConnection}
                                             onClose={() => closeTab({ stopPropagation: () => { } } as React.MouseEvent, tab.id)}
                                             appConfig={config}
-                                            aiOpen={tab.aiOpen}
-                                            aiMessages={tab.aiMessages}
-                                            onToggleAi={() => toggleAi(tab.id)}
-                                            onAiMessagesChange={(msgs) => setAiMessages(tab.id, msgs)}
-                                            aiFocusTrigger={tab.aiFocusTrigger}
-                                            onAlternateScreenChange={setActiveTabIsAltScreen}
+                                            onAppConfigUpdate={setConfig}
                                         />
-                                    )
-                                )}
-                                {tab.type === 'local-terminal' && (
-                                    <LocalTerminalComponent
-                                        id={tab.id}
-                                        theme={resolvedTheme}
-                                        terminalFontName={config.terminalFontName}
-                                        terminalFontSize={config.terminalFontSize}
-                                        terminalScrollSensitivity={config.terminalScrollSensitivity}
-                                        visible={activeView === 'tab' && activeTabId === tab.id}
-                                        enableContextMenu={config.enableTerminalContextMenu}
-                                        appConfig={config}
-                                        onClose={() => closeTab({ stopPropagation: () => { } } as React.MouseEvent, tab.id)}
-                                        onAlternateScreenChange={setActiveTabIsAltScreen}
-                                    />
-                                )}
-                                {tab.type === 'sftp' && tab.config && (
-                                    <SFTPBrowser
-                                        id={tab.id}
-                                        config={tab.config}
-                                        visible={activeTabId === tab.id}
-                                        onEditConfig={handleEditConnection}
-                                        onClose={() => closeTab({ stopPropagation: () => { } } as React.MouseEvent, tab.id)}
-                                        appConfig={config}
-                                        onAppConfigUpdate={setConfig}
-                                    />
-                                )}
-                                {tab.type === 'connection' && (
-                                    <ConnectionForm
-                                        onConnect={handleFormConnect}
-                                        initialConfig={tab.config}
-                                        appConfig={config}
-                                        onClose={() => closeTab({ stopPropagation: () => { } } as React.MouseEvent, tab.id)}
-                                    />
-                                )}
-                                {tab.type === 'mcp' && tab.config && (
-                                    <McpTab
-                                        config={tab.config}
-                                        appConfig={config}
-                                        onClose={() => closeTab({ stopPropagation: () => { } } as React.MouseEvent, tab.id)}
-                                        onAppConfigUpdate={setConfig}
-                                    />
-                                )}
-                            </div>
-                        ))}
+                                    )}
+                                    {tab.type === 'connection' && (
+                                        <ConnectionForm
+                                            onConnect={handleFormConnect}
+                                            initialConfig={tab.config}
+                                            appConfig={config}
+                                            onClose={() => closeTab({ stopPropagation: () => { } } as React.MouseEvent, tab.id)}
+                                        />
+                                    )}
+                                    {tab.type === 'mcp' && tab.config && (
+                                        <McpTab
+                                            config={tab.config}
+                                            appConfig={config}
+                                            onClose={() => closeTab({ stopPropagation: () => { } } as React.MouseEvent, tab.id)}
+                                            onAppConfigUpdate={setConfig}
+                                        />
+                                    )}
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </div>

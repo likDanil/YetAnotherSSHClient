@@ -94,7 +94,7 @@ const McpTabHeader: React.FC<McpTabHeaderProps> = ({
 
                 {!isServerAllowed ? (
                     <button
-                        className="btn-primary"
+                        className="btn-primary on-color-fill"
                         onClick={onGrantAccess}
                         style={{
                             height: '36px',
@@ -183,7 +183,7 @@ const McpPendingConfirmations: React.FC<McpPendingConfirmationsProps> = ({ confi
                     </div>
                     <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
                         <button
-                            className="btn-primary"
+                            className="btn-primary on-color-fill"
                             onClick={() => onConfirm(req.id, true)}
                             style={{ padding: '6px 14px', background: '#2ea44f', borderColor: '#2ea44f', fontSize: 'var(--ui-font-size)' }}
                         >

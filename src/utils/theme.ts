@@ -2,11 +2,11 @@ export const getXtermTheme = (theme: string) => {
     switch (theme) {
         case 'Dark':
             return {
-                background: '#0F172A',
+                background: '#131519',
                 foreground: '#E2E8F0',
                 cursor: '#E2E8F0',
-                selectionBackground: 'rgba(99, 102, 241, 0.3)',
-                black: '#0F172A',
+                selectionBackground: 'rgba(230, 232, 235, 0.22)',
+                black: '#131519',
                 red: '#ef4444',
                 green: '#10b981',
                 yellow: '#fbbf24',

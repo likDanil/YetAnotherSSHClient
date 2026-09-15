@@ -24,10 +24,19 @@
     overflow: hidden;
 }
 
+/* Каркас под шапкой: навигация приложения + рабочая область */
+.app-shell {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    background: var(--background);
+}
+
 .app-body-container {
     display: flex;
     flex: 1;
     min-height: 0;
+    min-width: 0;
     flex-direction: row;
 }
 
@@ -129,11 +138,16 @@ body.dark .tab-bar {
 
 .btn-primary {
     background-color: var(--accent) !important;
-    color: white !important;
+    color: var(--accent-contrast, #fff) !important;
     border: none !important;
     transition: filter 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
     border-radius: 8px !important;
     font-weight: 600;
+}
+
+/* Кнопка с собственной цветной заливкой (удаление, права доступа): текст остаётся белым */
+.btn-primary.on-color-fill {
+    color: #fff !important;
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -296,6 +310,7 @@ input:checked + .ui-slider {
 
 input:checked + .ui-slider:before {
     transform: translateX(22px);
+    background-color: var(--accent-contrast, #fff);
 }
 
 /* Settings Styles */
@@ -576,15 +591,6 @@ input[type=number] {
     background: var(--hover-surface) !important;
 }
 
-.nav-item:hover {
-    background: var(--hover-surface) !important;
-}
-
-.nav-item.active {
-    background: var(--hover-surface) !important;
-    color: var(--text-primary) !important;
-}
-
 .add-tab-btn:hover {
     background: var(--hover-surface) !important;
     color: var(--text-primary) !important;
@@ -637,144 +643,8 @@ input[type=number] {
     color: var(--text-primary) !important;
 }
 
-.server-card:hover {
-    border-color: var(--accent) !important;
-}
-
-.server-card .card-menu-btn {
-    opacity: 0;
-}
-
-.server-card:hover .card-menu-btn {
-    opacity: 1;
-}
-
-.card-menu-btn:hover {
-    background: var(--hover-surface) !important;
-    color: var(--text-primary) !important;
-}
-
-.add-card:hover {
-    background: var(--hover-surface) !important;
-    border-color: var(--accent) !important;
-}
-
-.add-card:hover .add-icon-circle {
-    background: var(--surface) !important;
-}
-
-.add-card:hover svg {
-    color: var(--accent);
-}
-
 .menu-dropdown-item:hover {
     background: var(--hover-surface) !important;
-}
-
-/* Server Card Optimizations */
-.server-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    cursor: pointer;
-    position: relative;
-    display: flex;
-    justify-content: flex-start;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    contain: layout style;
-    transition: border-color 0.2s ease, background-color 0.2s ease;
-}
-
-.server-card.standard {
-    border-radius: 16px;
-    padding: 24px;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-    min-height: 200px;
-}
-
-.server-card.medium {
-    border-radius: 12px;
-    padding: 22px;
-    flex-direction: row;
-    align-items: center;
-    gap: 16px;
-    min-height: 108px;
-}
-
-.server-card.compact {
-    border-radius: 8px;
-    padding: 8px 12px;
-    flex-direction: row;
-    align-items: center;
-    gap: 18px;
-    min-height: 48px;
-}
-
-.server-card-icon-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.server-card-icon-container.standard {
-    width: 56px;
-    height: 56px;
-}
-
-.server-card-icon-container.medium {
-    width: 55px;
-    height: 55px;
-}
-
-.server-card-icon-container.compact {
-    width: 24px;
-    height: 24px;
-}
-
-.server-card-info {
-    text-align: left;
-    flex: 1;
-    min-width: 0;
-}
-
-.server-card-meta-container {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--text-secondary);
-    font-size: 0.93rem;
-    font-family: var(--mono-font-family), serif;
-    width: 100%;
-    justify-content: space-between;
-}
-
-.server-card-tag-list {
-    display: flex;
-    gap: 8px;
-    justify-content: flex-start;
-}
-
-.server-card-tag {
-    font-size: 0.78rem;
-    color: var(--text-secondary);
-    font-weight: 600;
-    padding: 2px 8px;
-    background: var(--hover-surface);
-    border-radius: 4px;
-}
-
-.server-card-host-text {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 0 0 0;
-    color: var(--text-secondary);
-    font-size: 0.8rem;
-    font-family: var(--mono-font-family), serif;
-    opacity: 0.7;
-    line-height: 1;
 }
 
 @keyframes tooltipFadeIn {
@@ -913,13 +783,13 @@ input[type=number] {
 
 .message-wrapper.user .message-bubble {
     background: var(--accent);
-    color: white;
+    color: var(--accent-contrast, #fff);
     border-top-right-radius: 4px;
 }
 
 .message-wrapper.user .message-bubble ::selection {
-    background: rgba(255, 255, 255, 0.3);
-    color: white;
+    background: color-mix(in srgb, var(--accent-contrast, #fff) 30%, transparent);
+    color: var(--accent-contrast, #fff);
 }
 
 .message-footer {
@@ -1001,7 +871,7 @@ input[type=number] {
     border-radius: 50%;
     border: none;
     background: var(--accent);
-    color: white;
+    color: var(--accent-contrast, #fff);
     cursor: pointer;
     transition: all 0.2s;
     flex-shrink: 0;
@@ -1188,8 +1058,8 @@ input[type=number] {
 }
 
 .message-wrapper.user .text-content code:not(pre code) {
-    background: rgba(255, 255, 255, 0.2);
-    color: #fff;
+    background: color-mix(in srgb, var(--accent-contrast, #fff) 18%, transparent);
+    color: var(--accent-contrast, #fff);
 }
 
 /* AI Chat Rules Modal Styles */
